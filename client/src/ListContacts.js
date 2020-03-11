@@ -7,29 +7,50 @@ class ListContacts extends Component {
         contacts: PropTypes.array.isRequired,
         onDeleteContact: PropTypes.func.isRequired
     }
+    
     state = {
         query: ''
     }
+
     updateQuery = (query) => {
         this.setState(()=> ({
             query: query.trim()
         }))
     }
+
+    clearQuery = () => {
+        this.updateQuery('')
+    }
+
     render(){
+        const { query } = this.state;
+        const { contacts, onDeleteContact } = this.props;
+
+        const showingContacts = query === '' 
+            ? contacts 
+            : contacts.filter(contact => (
+                contact.name.toLowerCase().includes(query.toLocaleLowerCase())
+            ))
+
         return (
             <div className="list-contacts">
-                {JSON.stringify(this.state)}
                 <div className="list-contacts-top">
                     <input 
                         className="search-contacts"
                         type="text"
                         placeholder="Search Contacts"
-                        value={this.state.query}
+                        value={query}
                         onChange={(event) => this.updateQuery(event.target.value)}
                     />
                 </div>
+                {showingContacts.length !== contacts.length && (
+                    <div className="showing-contacts">
+                        <span>Now showing {showingContacts.length} of {contacts.length}</span>
+                        <button onClick={this.clearQuery}>Show all</button>
+                    </div>
+                )}
                 <ol className="contact-list">
-                    {this.props.contacts.map((contact) => (
+                    {showingContacts.map((contact) => (
                         <li key={contact.id} className="contact-list-item">
                         <div 
                             className="contact-avatar" 
@@ -42,7 +63,7 @@ class ListContacts extends Component {
                             <p>{contact.handle}</p>
                         </div>
                         <button 
-                            onClick={() => this.props.onDeleteContact(contact)}
+                            onClick={() => onDeleteContact(contact)}
                             className="contact-remove">
                             Remove
                         </button>
